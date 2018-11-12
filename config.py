@@ -15,6 +15,7 @@ class ProductionConfig(Config):
 
 class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite://'
+    UPLOAD_FOLDER = 'uploads'
     TESTING = True
 
 config = {

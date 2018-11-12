@@ -33,7 +33,7 @@ def get_applied_courses():
 @student_api.route('/course/<int:id>', methods=['POST'])
 @token_auth.login_required
 @check_user(Student)
-def apply_for_course():
+def apply_for_course(id):
     course = Course.query.filter_by(id=id).first()
     if course is None:
         return '', 410
@@ -108,17 +108,26 @@ def submit_solution(id):
     homework = Homework.query.filter_by(id=id).first()
     if homework is None:
         return '', 410
+    student = Student.query.filter_by(id=g.current_user.id).first()
+    if student not in homework.students:
+        return '', 403
     course = Course.query.join(Homework, Homework.course_id==Course.id) \
                          .filter(Homework.id==id) \
                          .first()
     if course is None:
         return '', 410
+    solution = Solution()
+    solution.homework_id = homework.id
     course_folder = course.name
     homework_folder = homework.name
     filename = secure_filename(request.files['file'].filename)
-    homework.file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], course_folder, homework_folder, filename)
-    request.files['file'].save(homework.file_path)
+    solution.file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], course_folder, homework_folder, filename)
+    if not os.path.exists(solution.file_path):
+        os.makedirs(os.path.dirname(os.path.abspath(solution.file_path)))
+    request.files['file'].save(solution.file_path)
+    db.session.add(solution)
     db.session.commit()
+    return '', 200
 
 @student_api.route('/homeworks', methods=['GET'])
 @token_auth.login_required

@@ -12,9 +12,9 @@ if __name__ == '__main__':
     db.drop_all()
     db.create_all()
     admin_user = Administrator()
-    admin_user.name = 'asd'
-    admin_user.username = 'asd'
-    admin_user.set_password('asd')
+    admin_user.name = 'admin'
+    admin_user.username = 'admin'
+    admin_user.set_password('admin')
     db.session.add(admin_user)
     db.session.commit()
     app_context.pop()
