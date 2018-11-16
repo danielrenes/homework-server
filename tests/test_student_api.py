@@ -38,8 +38,11 @@ class StudentApiTest(BaseApiTest):
         data = json.loads(rv.data.decode())
         self.assertTrue(all(item in data for item in ['courses', 'next', 'prev']))
         self.assertEquals(len(data['courses']), 1)
-        self.assertTrue(all(item in data['courses'][0] for item in ['name', 'description', 'teacher']))
-        self.assertEquals(data['courses'][0], {'name': 'course', 'description': 'course', 'teacher': 'teacher'})
+        self.assertTrue(all(item in data['courses'][0] for item in ['id', 'name', 'description', 'teacher']))
+        self.assertIsNotNone(data['courses'][0]['id'])
+        self.assertEquals(data['courses'][0]['name'], 'course')
+        self.assertEquals(data['courses'][0]['description'], 'course')
+        self.assertEquals(data['courses'][0]['teacher'], 'teacher')
 
     def test_apply_for_course(self):
         # create a course
@@ -150,9 +153,14 @@ class StudentApiTest(BaseApiTest):
         self.assertTrue(all(item in data for item in ['homeworks', 'next', 'prev']))
         self.assertEquals(len(data['homeworks']), 1)
         self.assertTrue(all(item in data['homeworks'][0] for item in \
-            ['name', 'description', 'deadline', 'headcount', 'self_assignable', 'course']))
-        self.assertEquals(data['homeworks'][0], {'name': 'homework', 'description': 'homework', \
-            'deadline': '2018-11-08 08:48:11', 'headcount': 4, 'self_assignable': False, 'course': 'course'})
+            ['id', 'name', 'description', 'deadline', 'headcount', 'self_assignable', 'course']))
+        self.assertIsNotNone(data['homeworks'][0]['id'])
+        self.assertEquals(data['homeworks'][0]['name'], 'homework')
+        self.assertEquals(data['homeworks'][0]['description'], 'homework')
+        self.assertEquals(data['homeworks'][0]['deadline'], '2018-11-08 08:48:11')
+        self.assertEquals(data['homeworks'][0]['headcount'], 4)
+        self.assertEquals(data['homeworks'][0]['self_assignable'], False)
+        self.assertEquals(data['homeworks'][0]['course'], 'course')
 
     def test_apply_for_homework(self):
         # create a course
@@ -397,14 +405,26 @@ class StudentApiTest(BaseApiTest):
         data = json.loads(rv.data.decode())
         self.assertTrue(all(item in data for item in ['homeworks', 'next', 'prev']))
         self.assertEquals(len(data['homeworks']), 2)
+
         self.assertTrue(all(item in data['homeworks'][0] for item in \
-            ['name', 'description', 'deadline', 'headcount', 'self_assignable', 'course']))
-        self.assertEquals(data['homeworks'][0], {'name': 'homework', 'description': 'homework', \
-            'deadline': '2018-11-08 08:48:11', 'headcount': 4, 'self_assignable': False, 'course': 'course'})
+            ['id', 'name', 'description', 'deadline', 'headcount', 'self_assignable', 'course']))
+        self.assertIsNotNone(data['homeworks'][0]['id'])
+        self.assertEquals(data['homeworks'][0]['name'], 'homework')
+        self.assertEquals(data['homeworks'][0]['description'], 'homework')
+        self.assertEquals(data['homeworks'][0]['deadline'], '2018-11-08 08:48:11')
+        self.assertEquals(data['homeworks'][0]['headcount'], 4)
+        self.assertEquals(data['homeworks'][0]['self_assignable'], False)
+        self.assertEquals(data['homeworks'][0]['course'], 'course')
+
         self.assertTrue(all(item in data['homeworks'][1] for item in \
-            ['name', 'description', 'deadline', 'headcount', 'self_assignable', 'course']))
-        self.assertEquals(data['homeworks'][1], {'name': 'homework2', 'description': 'homework2', \
-            'deadline': '2018-11-08 08:48:11', 'headcount': 4, 'self_assignable': False, 'course': 'course2'})
+            ['id', 'name', 'description', 'deadline', 'headcount', 'self_assignable', 'course']))
+        self.assertIsNotNone(data['homeworks'][1]['id'])
+        self.assertEquals(data['homeworks'][1]['name'], 'homework2')
+        self.assertEquals(data['homeworks'][1]['description'], 'homework2')
+        self.assertEquals(data['homeworks'][1]['deadline'], '2018-11-08 08:48:11')
+        self.assertEquals(data['homeworks'][1]['headcount'], 4)
+        self.assertEquals(data['homeworks'][1]['self_assignable'], False)
+        self.assertEquals(data['homeworks'][1]['course'], 'course2')
 
     def test_get_solutions(self):
         # create a homework
@@ -460,7 +480,8 @@ class StudentApiTest(BaseApiTest):
         data = json.loads(rv.data.decode())
         self.assertTrue(all(item in data for item in ['solutions', 'next', 'prev']))
         self.assertEquals(len(data['solutions']), 1)
-        self.assertTrue(all(item in data['solutions'][0] for item in ['status', 'submitted_at']))
+        self.assertTrue(all(item in data['solutions'][0] for item in ['id', 'status', 'submitted_at']))
+        self.assertIsNotNone(data['solutions'][0]['id'])
         self.assertEquals(data['solutions'][0]['status'], 'status')
         self.assertTrue(abs((submitted_at - datetime.strptime(data['solutions'][0]['submitted_at'], '%Y-%m-%d %H:%M:%S')).seconds) < 1)
 
@@ -517,6 +538,7 @@ class StudentApiTest(BaseApiTest):
         # check returned data
         data = json.loads(rv.data.decode())
         self.assertTrue('solution' in data)
-        self.assertTrue(all(item in data['solution'] for item in ['status', 'submitted_at']))
+        self.assertTrue(all(item in data['solution'] for item in ['id', 'status', 'submitted_at']))
+        self.assertIsNotNone(data['solution']['id'])
         self.assertEquals(data['solution']['status'], 'status')
         self.assertTrue(abs((submitted_at - datetime.strptime(data['solution']['submitted_at'], '%Y-%m-%d %H:%M:%S')).seconds) < 1)

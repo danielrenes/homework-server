@@ -38,7 +38,7 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def get_token(self, expires_in=3600):
+    def get_token(self, expires_in=10):
         now = datetime.utcnow()
         if self.token and self.token_expiration > now + timedelta(seconds=60):
             return self.token
@@ -119,8 +119,8 @@ class Course(db.Model):
     name = db.Column(db.String(64), unique=True, nullable=False)
     description = db.Column(db.String(256), nullable=False)
 
-    teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)
-    homeworks = db.relationship('Homework', backref='course', lazy=True)
+    teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
+    homeworks = db.relationship('Homework', backref='course', lazy=True, cascade='all, delete-orphan')
     students = db.relationship('Student',
                                secondary=students_courses_table,
                                backref='students_courses'
@@ -153,7 +153,7 @@ class Homework(db.Model):
     self_assignable = db.Column(db.Boolean, nullable=False, default=False)
 
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)
-    solutions = db.relationship('Solution', backref='student', lazy=True)
+    solutions = db.relationship('Solution', backref='student', lazy=True, cascade='all, delete-orphan')
     students = db.relationship('Student',
                                secondary=students_homeworks_table,
                                backref='students_homeworks'

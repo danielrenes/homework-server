@@ -39,6 +39,11 @@ def get_token():
     db.session.commit()
     return jsonify({'token': token})
 
+@auth_api.route('/token', methods=['GET'])
+@token_auth.login_required
+def check_token():
+    return '', 200
+
 @auth_api.route('/token', methods=['DELETE'])
 @token_auth.login_required
 def revoke_token():

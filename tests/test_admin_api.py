@@ -24,8 +24,10 @@ class AdminApiTest(BaseApiTest):
         data = json.loads(rv.data.decode())
         self.assertTrue(all(item in data for item in ['teachers', 'next', 'prev']))
         self.assertEquals(len(data['teachers']), 1)
-        self.assertTrue(all(item in data['teachers'][0] for item in ['name', 'username']))
-        self.assertEquals(data['teachers'][0], {'name': 'teacher', 'username': 'teacher'})
+        self.assertTrue(all(item in data['teachers'][0] for item in ['id', 'name', 'username']))
+        self.assertIsNotNone(data['teachers'][0]['id'])
+        self.assertEquals(data['teachers'][0]['name'], 'teacher')
+        self.assertEquals(data['teachers'][0]['username'], 'teacher')
 
     def test_create_teacher(self):
         # try to access with basic authentication
@@ -113,8 +115,10 @@ class AdminApiTest(BaseApiTest):
         data = json.loads(rv.data.decode())
         self.assertTrue(all(item in data for item in ['students', 'next', 'prev']))
         self.assertEquals(len(data['students']), 1)
-        self.assertTrue(all(item in data['students'][0] for item in ['name', 'username']))
-        self.assertEquals(data['students'][0], {'name': 'student', 'username': 'student'})
+        self.assertTrue(all(item in data['students'][0] for item in ['id', 'name', 'username']))
+        self.assertIsNotNone(data['students'][0]['id'])
+        self.assertEquals(data['students'][0]['name'], 'student')
+        self.assertEquals(data['students'][0]['username'], 'student')
 
     def test_create_student(self):
         # try to access with basic authentication

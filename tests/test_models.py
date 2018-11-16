@@ -29,10 +29,10 @@ class ModelsTest(BaseTest):
         self.assertIsNotNone(admin.id)
         self.assertNotEquals(admin.password_hash, 'admin')
         self.assertEquals(admin.type, 'administrators')
-        self.assertEquals(admin.to_dict(), {
-            'username': 'admin',
-            'name': 'admin'
-        })
+        d = admin.to_dict()
+        self.assertIsNotNone(d['id'])
+        self.assertEquals(d['username'], 'admin')
+        self.assertEquals(d['name'], 'admin')
 
         # try to create admin with the same username
         admin2 = Administrator()
@@ -66,10 +66,10 @@ class ModelsTest(BaseTest):
         self.assertIsNotNone(teacher.id)
         self.assertNotEquals(teacher.password_hash, 'teacher')
         self.assertEquals(teacher.type, 'teachers')
-        self.assertEquals(teacher.to_dict(), {
-            'username': 'teacher',
-            'name': 'teacher'
-        })
+        d = teacher.to_dict()
+        self.assertIsNotNone(d['id'])
+        self.assertEquals(d['username'], 'teacher')
+        self.assertEquals(d['name'], 'teacher')
 
         # try to create teacher with the same username
         teacher2 = Teacher()
@@ -103,10 +103,10 @@ class ModelsTest(BaseTest):
         self.assertIsNotNone(student.id)
         self.assertNotEquals(student.password_hash, 'student')
         self.assertEquals(student.type, 'students')
-        self.assertEquals(student.to_dict(), {
-            'username': 'student',
-            'name': 'student'
-        })
+        d = student.to_dict()
+        self.assertIsNotNone(d['id'])
+        self.assertEquals(d['username'], 'student')
+        self.assertEquals(d['name'], 'student')
 
         # try to create student with the same username
         student2 = Student()
@@ -173,8 +173,8 @@ class ModelsTest(BaseTest):
             'description': 'course'
         })
         db.session.add(course)
-        self.assertRaises(IntegrityError, db.session.commit)
-        db.session.rollback()
+
+        self.assertIsNone(course.teacher_id)
 
         # create a teacher
         teacher = Teacher()
@@ -195,11 +195,11 @@ class ModelsTest(BaseTest):
         self.assertEquals(len(Course.query.all()), 1)
         self.assertIsNotNone(course.id)
         self.assertEquals(course.teacher_id, teacher.id)
-        self.assertEquals(course.to_dict(), {
-            'name': 'course',
-            'description': 'course',
-            'teacher': 'teacher'
-        })
+        d = course.to_dict()
+        self.assertIsNotNone(d['id'])
+        self.assertEquals(d['name'], 'course')
+        self.assertEquals(d['description'], 'course')
+        self.assertEquals(d['teacher'], 'teacher')
 
         # try to create course with the same name
         course2 = Course()
@@ -260,14 +260,14 @@ class ModelsTest(BaseTest):
         self.assertEquals(len(Homework.query.all()), 1)
         self.assertIsNotNone(homework.id)
         self.assertEquals(homework.course_id, course.id)
-        self.assertEquals(homework.to_dict(), {
-            'name': 'homework',
-            'description': 'homework',
-            'deadline': '2018-10-30 10:20:32',
-            'headcount': 2,
-            'self_assignable': True,
-            'course': 'course'
-        })
+        d = homework.to_dict()
+        self.assertIsNotNone(d['id'])
+        self.assertEquals(d['name'], 'homework')
+        self.assertEquals(d['description'], 'homework')
+        self.assertEquals(d['deadline'], '2018-10-30 10:20:32')
+        self.assertEquals(d['headcount'], 2)
+        self.assertTrue(d['self_assignable'])
+        self.assertEquals(d['course'], 'course')
 
         # try to create homework with the same name
         homework2 = Homework()
@@ -348,6 +348,7 @@ class ModelsTest(BaseTest):
         self.assertIsNotNone(solution.id)
         self.assertEquals(solution.homework_id, homework.id)
         d = solution.to_dict()
-        self.assertEquals(sorted(d.keys()), ['status', 'submitted_at'])
+        self.assertIsNotNone(d['id'])
+        self.assertEquals(sorted(d.keys()), ['id', 'status', 'submitted_at'])
         self.assertEquals(d['status'], 'status')
         self.assertTrue(abs((submitted_at - datetime.strptime(d['submitted_at'], '%Y-%m-%d %H:%M:%S')).seconds) < 1)
