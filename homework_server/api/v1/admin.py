@@ -16,7 +16,7 @@ def get_teachers():
     url_next = url_for('admin_api.get_teachers', **{'start': start + limit + 1, 'limit': limit}) \
                 if len(teachers) > (start + limit) else None
     url_prev = url_for('admin_api.get_teachers', **{'start': start - limit - 1, 'limit': limit}) \
-                if (start - limit - 1) > 0 else None 
+                if (start - limit - 1) > 0 else None
     return jsonify({
         'teachers': [teacher.to_dict() for teacher in teachers],
         'next': url_next,

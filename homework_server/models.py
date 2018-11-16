@@ -61,6 +61,7 @@ class User(db.Model):
 
     def to_dict(self):
         return {
+            'id': self.id,
             'username': self.username,
             'name': self.name
         }
@@ -130,6 +131,7 @@ class Course(db.Model):
         teacher_name = teacher.name if teacher is not None else None
 
         return {
+            'id': self.id,
             'name': self.name,
             'description': self.description,
             'teacher': teacher_name
@@ -162,6 +164,7 @@ class Homework(db.Model):
         course_name = course.name if course is not None else None
 
         return {
+            'id': self.id,
             'name': self.name,
             'description': self.description,
             'deadline': self.deadline.strftime('%Y-%m-%d %H:%M:%S'),
@@ -205,6 +208,7 @@ class Solution(db.Model):
 
     def to_dict(self):
         return {
+            'id': self.id,
             'submitted_at': self.submitted_at.strftime('%Y-%m-%d %H:%M:%S'),
             'status': self.status
         }
