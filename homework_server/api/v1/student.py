@@ -139,8 +139,9 @@ def submit_solution(id):
     homework_folder = homework.name
     filename = secure_filename(request.files['file'].filename)
     solution.file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], course_folder, homework_folder, filename)
-    if not os.path.exists(solution.file_path):
-        os.makedirs(os.path.dirname(os.path.abspath(solution.file_path)))
+    parent_dir = os.path.abspath(os.path.join(solution.file_path, os.pardir))
+    if not os.path.exists(parent_dir):
+        os.makedirs(parent_dir)
     request.files['file'].save(solution.file_path)
     db.session.add(solution)
     db.session.commit()
