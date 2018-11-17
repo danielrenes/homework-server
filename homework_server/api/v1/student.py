@@ -9,6 +9,23 @@ from homework_server.models import Course, Homework, Solution, Student
 
 student_api = Blueprint('student_api', __name__)
 
+@student_api.route('/courses/all', methods=['GET'])
+@token_auth.login_required
+@check_user(Student)
+def get_courses():
+    start = request.args.get('start', 0)
+    limit = request.args.get('limit', 25)
+    courses = Course.query.order_by(Course.name).paginate(start, limit, False).items
+    url_next = url_for('student_api.get_courses', **{'start': start + limit + 1, 'limit': limit}) \
+                if len(courses) > (start + limit) else None
+    url_prev = url_for('student_api.get_courses', **{'start': start - limit - 1, 'limit': limit}) \
+                if (start - limit - 1) > 0 else None 
+    return jsonify({
+        'courses': [course.to_dict() for course in courses],
+        'next': url_next,
+        'prev': url_prev
+    })
+
 @student_api.route('/courses', methods=['GET'])
 @token_auth.login_required
 @check_user(Student)

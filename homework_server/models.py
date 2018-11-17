@@ -202,7 +202,7 @@ class Solution(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     file_path = db.Column(db.String(256), nullable=False)
     submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
-    status = db.Column(db.String(512))
+    status = db.Column(db.String(512), default='')
 
     homework_id = db.Column(db.Integer, db.ForeignKey('homeworks.id'), nullable=False)
 
