@@ -173,7 +173,7 @@ class TeacherApiTest(BaseApiTest):
         # try to access with basic authentication
         rv = self.client.post(f'/api/v1/teacher/course/{course.id}/homeworks', headers=self.basic_auth_header('teacher', 'teacher'), \
                               data=json.dumps({'name': 'f1', 'description': 'f2', 'deadline': '2018-11-08 08:48:11', \
-                                               'headcount': 4, 'self_assignable': False}))
+                                               'headcount': 4, 'self_assignable': False, 'students': [self.student.id,]}))
         self.assertEquals(rv.status_code, 401)
 
         # get token
@@ -184,7 +184,7 @@ class TeacherApiTest(BaseApiTest):
         # access with token
         rv = self.client.post(f'/api/v1/teacher/course/{course.id}/homeworks', headers=self.token_auth_header(token), \
                               data=json.dumps({'name': 'f1', 'description': 'f2', 'deadline': '2018-11-08 08:48:11', \
-                                               'headcount': 4, 'self_assignable': False}))
+                                               'headcount': 4, 'self_assignable': False, 'students': [self.student.id,]}))
         self.assertEquals(rv.status_code, 200)
 
         # check if homework was created
@@ -196,7 +196,7 @@ class TeacherApiTest(BaseApiTest):
         self.assertEquals(homework.headcount, 4)
         self.assertEquals(homework.self_assignable, False)
         self.assertEquals(homework.course_id, course.id)
-        self.assertEquals(len(homework.students), 0)
+        self.assertEquals(len(homework.students), 1)
 
         # try to create homework without all the necessary fields
         data = {
@@ -264,19 +264,20 @@ class TeacherApiTest(BaseApiTest):
         self.assertEquals(homework.course_id, course.id)
         self.assertEquals(len(homework.students), 0)
 
-        # try to modify homework without all the necessary fields
+        # try to modify homework with any of the necessary fields
         data = {
             'name': 'f1',
             'description': 'f2',
             'deadline': '2018-11-08 08:48:11',
             'headcount': 4,
-            'self_assignable': False
+            'self_assignable': False,
+            'students': [self.student.id,]
         }
         request_datas = self.insufficient_datas(data)
         for d in request_datas:
             rv = self.client.put(f'/api/v1/teacher/homework/{homework.id}', \
                                  headers=self.token_auth_header(token), data=json.dumps(d))
-            self.assertEquals(rv.status_code, 400)
+            self.assertEquals(rv.status_code, 200)
 
     def test_remove_homework(self):
         # create a homework

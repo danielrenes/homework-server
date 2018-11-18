@@ -88,7 +88,7 @@ def create_homework(id):
 @check_user(Teacher)
 def modify_homework(id):
     data = request.get_json() or {}
-    if not all(field in data for field in ['name', 'description', 'deadline', 'headcount', 'self_assignable']):
+    if not any(field in data for field in ['name', 'description', 'deadline', 'headcount', 'self_assignable', 'students']):
         return '', 400
     homework = Homework.query.filter_by(id=id).first()
     if homework is None:

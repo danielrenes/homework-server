@@ -174,7 +174,7 @@ class StudentApiTest(BaseApiTest):
         db.session.add(course)
         db.session.commit()
 
-        # create a homework
+        # create a not self assignable homework
         homework = Homework()
         homework.from_dict({
             'name': 'homework',
@@ -198,6 +198,14 @@ class StudentApiTest(BaseApiTest):
 
         # access with token
         rv = self.client.post(f'/api/v1/student/homework/{homework.id}', headers=self.token_auth_header(token))
+        self.assertEquals(rv.status_code, 409)
+
+        # make homework self assignable
+        homework.self_assignable = True
+        db.session.add(homework)
+
+        # access with token
+        rv = self.client.post(f'/api/v1/student/homework/{homework.id}', headers=self.token_auth_header(token))
         self.assertEquals(rv.status_code, 200)
 
         # check data
@@ -207,7 +215,7 @@ class StudentApiTest(BaseApiTest):
         self.assertEquals(homework.description, 'homework')
         self.assertEquals(homework.deadline, datetime.strptime('2018-11-08 08:48:11', '%Y-%m-%d %H:%M:%S'))
         self.assertEquals(homework.headcount, 4)
-        self.assertEquals(homework.self_assignable, False)
+        self.assertEquals(homework.self_assignable, True)
         self.assertEquals(homework.course_id, course.id)
         self.assertEquals(len(homework.students), 1)
         self.assertEquals(homework.students[0].name, 'student')
@@ -318,9 +326,9 @@ class StudentApiTest(BaseApiTest):
         # check data
         solutions = Solution.query.all()
         self.assertEquals(len(solutions), 1)
-        solution = Solution.query.filter_by(status=None).first()
+        solution = Solution.query.filter_by(status='').first()
         self.assertTrue(all(item in solution.to_dict() for item in ['status', 'submitted_at']))
-        self.assertIsNone(solution.status)
+        self.assertEquals(solution.status, '')
         self.assertTrue(abs((submitted_at - solution.submitted_at).seconds) < 1)
         self.assertIsNotNone(solution.file_path)
 

@@ -195,6 +195,10 @@ class Homework(db.Model):
                 self.self_assignable = data['self_assignable']
             elif type(data['self_assignable']) == str and data['self_assignable'].lower() in ['true', 'false']:
                 self.self_assignable = (data['self_assignable'].lower() == 'true')
+        if 'students' in data:
+            for id in data['students']:
+                student = Student.query.filter_by(id=id).first()
+                self.students.append(student)
 
 class Solution(db.Model):
     __tablename__ = 'solutions'

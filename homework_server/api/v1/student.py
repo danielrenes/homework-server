@@ -54,6 +54,8 @@ def apply_for_course(id):
     course = Course.query.filter_by(id=id).first()
     if course is None:
         return '', 410
+    if g.current_user in course.students:
+        return '', 304
     course.students.append(g.current_user)
     db.session.commit()
     return '', 200
@@ -99,6 +101,10 @@ def apply_for_homework(id):
     homework = Homework.query.filter_by(id=id).first()
     if homework is None:
         return '', 410
+    if not homework.self_assignable:
+        return '', 409
+    if g.current_user in homework.students:
+        return '', 304
     homework.students.append(g.current_user)
     db.session.commit()
     return '', 200
