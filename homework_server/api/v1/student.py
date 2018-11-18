@@ -130,7 +130,7 @@ def submit_solution(id):
         return '', 410
     student = Student.query.filter_by(id=g.current_user.id).first()
     if student not in homework.students:
-        return '', 403
+        return '', 409
     course = Course.query.join(Homework, Homework.course_id==Course.id) \
                          .filter(Homework.id==id) \
                          .first()
