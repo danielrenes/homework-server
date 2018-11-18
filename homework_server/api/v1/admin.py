@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify, request, url_for
 from .auth import check_user, token_auth
 from homework_server import db
 from homework_server.models import Administrator, Teacher, Student
+from homework_server.pagination import PaginatedQuery
 
 admin_api = Blueprint('admin_api', __name__)
 
@@ -10,18 +11,18 @@ admin_api = Blueprint('admin_api', __name__)
 @token_auth.login_required
 @check_user(Administrator)
 def get_teachers():
-    start = request.args.get('start', 0)
-    limit = request.args.get('limit', 25)
-    teachers = Teacher.query.order_by(Teacher.name).paginate(start, limit, False).items
-    url_next = url_for('admin_api.get_teachers', **{'start': start + limit + 1, 'limit': limit}) \
-                if len(teachers) > (start + limit) else None
-    url_prev = url_for('admin_api.get_teachers', **{'start': start - limit - 1, 'limit': limit}) \
-                if (start - limit - 1) > 0 else None
-    return jsonify({
-        'teachers': [teacher.to_dict() for teacher in teachers],
-        'next': url_next,
-        'prev': url_prev
-    })
+    start = request.args.get('start', 1, type=int)
+    limit = request.args.get('limit', 25, type=int)
+    paginate = PaginatedQuery(
+        Teacher.query.order_by(Teacher.name),
+        Teacher.query.count(),
+        'admin_api.get_teachers',
+        'teachers',
+        start,
+        limit
+    )
+    result = paginate.execute()
+    return jsonify(result)
 
 @admin_api.route('/teachers', methods=['POST'])
 @token_auth.login_required
@@ -51,18 +52,18 @@ def remove_teacher(id):
 @token_auth.login_required
 @check_user(Administrator)
 def get_students():
-    start = request.args.get('start', 0)
-    limit = request.args.get('limit', 25)
-    students = Student.query.order_by(Student.name).paginate(start, limit, False).items
-    url_next = url_for('admin_api.get_students', **{'start': start + limit + 1, 'limit': limit}) \
-                if len(students) > (start + limit) else None
-    url_prev = url_for('admin_api.get_students', **{'start': start - limit - 1, 'limit': limit}) \
-                if (start - limit - 1) > 0 else None 
-    return jsonify({
-        'students': [student.to_dict() for student in students],
-        'next': url_next,
-        'prev': url_prev
-    })
+    start = request.args.get('start', 1, type=int)
+    limit = request.args.get('limit', 25, type=int)
+    paginate = PaginatedQuery(
+        Student.query.order_by(Student.name),
+        Student.query.count(),
+        'admin_api.get_students',
+        'students',
+        start,
+        limit
+    )
+    result = paginate.execute()
+    return jsonify(result)
 
 @admin_api.route('/students', methods=['POST'])
 @token_auth.login_required

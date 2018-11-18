@@ -3,6 +3,7 @@ from flask import Blueprint, current_app, g, jsonify, request, url_for
 from .auth import check_user, token_auth
 from homework_server import db
 from homework_server.models import Course, Homework, Solution, Student, Teacher
+from homework_server.pagination import PaginatedQuery
 
 teacher_api = Blueprint('teacher_api', __name__)
 
@@ -10,18 +11,18 @@ teacher_api = Blueprint('teacher_api', __name__)
 @token_auth.login_required
 @check_user(Teacher)
 def get_courses():
-    start = request.args.get('start', 0)
-    limit = request.args.get('limit', 25)
-    courses = Course.query.order_by(Course.name).paginate(start, limit, False).items
-    url_next = url_for('teacher_api.get_courses', **{'start': start + limit + 1, 'limit': limit}) \
-                if len(courses) > (start + limit) else None
-    url_prev = url_for('teacher_api.get_courses', **{'start': start - limit - 1, 'limit': limit}) \
-                if (start - limit - 1) > 0 else None 
-    return jsonify({
-        'courses': [course.to_dict() for course in courses],
-        'next': url_next,
-        'prev': url_prev
-    })
+    start = request.args.get('start', 1, type=int)
+    limit = request.args.get('limit', 25, type=int)
+    paginate = PaginatedQuery(
+        Course.query.order_by(Course.name),
+        Course.query.count(),
+        'teacher_api.get_courses',
+        'courses',
+        start,
+        limit
+    )
+    result = paginate.execute()
+    return jsonify(result)
 
 @teacher_api.route('/courses', methods=['POST'])
 @token_auth.login_required
@@ -52,22 +53,20 @@ def remove_course(id):
 @token_auth.login_required
 @check_user(Teacher)
 def get_homeworks(id):
-    start = request.args.get('start', 0)
-    limit = request.args.get('limit', 25)
-    homeworks = Homework.query.join(Course, Course.id==Homework.course_id) \
-                              .filter(Course.id==id) \
-                              .order_by(Homework.name) \
-                              .paginate(start, limit, False) \
-                              .items
-    url_next = url_for('teacher_api.get_homeworks', id=id, **{'start': start + limit + 1, 'limit': limit}) \
-                if len(homeworks) > (start + limit) else None
-    url_prev = url_for('teacher_api.get_homeworks', id=id, **{'start': start - limit - 1, 'limit': limit}) \
-                if (start - limit - 1) > 0 else None 
-    return jsonify({
-        'homeworks': [homework.to_dict() for homework in homeworks],
-        'next': url_next,
-        'prev': url_prev
-    })
+    start = request.args.get('start', 1, type=int)
+    limit = request.args.get('limit', 25, type=int)
+    base_query = Homework.query.join(Course, Course.id==Homework.course_id) \
+                               .filter(Course.id==id)
+    paginate = PaginatedQuery(
+        base_query.order_by(Homework.name),
+        base_query.count(),
+        'teacher_api.get_homeworks',
+        'homeworks',
+        start,
+        limit
+    )
+    result = paginate.execute()
+    return jsonify(result)
 
 @teacher_api.route('/course/<int:id>/homeworks', methods=['POST'])
 @token_auth.login_required
@@ -112,42 +111,38 @@ def remove_homework(id):
 @token_auth.login_required
 @check_user(Teacher)
 def get_students(id):
-    start = request.args.get('start', 0)
-    limit = request.args.get('limit', 25)
-    students = Student.query.join(Course, Student.courses) \
-                            .order_by(Student.name) \
-                            .paginate(start, limit, False) \
-                            .items
-    url_next = url_for('teacher_api.get_students', id=id, **{'start': start + limit + 1, 'limit': limit}) \
-                if len(students) > (start + limit) else None
-    url_prev = url_for('teacher_api.get_students', id=id, **{'start': start - limit - 1, 'limit': limit}) \
-                if (start - limit - 1) > 0 else None 
-    return jsonify({
-        'students': [student.to_dict() for student in students],
-        'next': url_next,
-        'prev': url_prev
-    })
+    start = request.args.get('start', 1, type=int)
+    limit = request.args.get('limit', 25, type=int)
+    base_query = Student.query.join(Course, Student.courses)
+    paginate = PaginatedQuery(
+        base_query.order_by(Student.name),
+        base_query.count(),
+        'teacher_api.get_students',
+        'students',
+        start,
+        limit
+    )
+    result = paginate.execute()
+    return jsonify(result)
 
 @teacher_api.route('/homework/<int:id>/solutions', methods=['GET'])
 @token_auth.login_required
 @check_user(Teacher)
 def get_solutions(id):
-    start = request.args.get('start', 0)
-    limit = request.args.get('limit', 25)
-    solutions = Solution.query.join(Homework, Homework.id==Solution.homework_id) \
-                              .filter(Homework.id==id) \
-                              .order_by(Solution.submitted_at.desc()) \
-                              .paginate(start, limit, False) \
-                              .items
-    url_next = url_for('teacher_api.get_solutions', id=id, **{'start': start + limit + 1, 'limit': limit}) \
-                if len(solutions) > (start + limit) else None
-    url_prev = url_for('teacher_api.get_solutions', id=id, **{'start': start - limit - 1, 'limit': limit}) \
-                if (start - limit - 1) > 0 else None 
-    return jsonify({
-        'solutions': [solution.to_dict() for solution in solutions],
-        'next': url_next,
-        'prev': url_prev
-    })
+    start = request.args.get('start', 1, type=int)
+    limit = request.args.get('limit', 25, type=int)
+    base_query = Solution.query.join(Homework, Homework.id==Solution.homework_id) \
+                               .filter(Homework.id==id)
+    paginate = PaginatedQuery(
+        base_query.order_by(Solution.submitted_at.desc()),
+        base_query.count(),
+        'teacher_api.get_solutions',
+        'solutions',
+        start,
+        limit
+    )
+    result = paginate.execute()
+    return jsonify(result)
 
 @teacher_api.route('/solution/<int:id>', methods=['GET'])
 @token_auth.login_required
