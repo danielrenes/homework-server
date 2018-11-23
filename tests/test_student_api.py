@@ -340,7 +340,7 @@ class StudentApiTest(BaseApiTest):
         # access with student2's token
         rv = self.client.post(f'/api/v1/student/homework/{homework.id}/submit', headers=self.token_auth_header(token), \
                               content_type='multipart/form-data', data={'file': (BytesIO(b'tmp'), 'tmp.txt')})
-        self.assertEquals(rv.status_code, 403)
+        self.assertEquals(rv.status_code, 409)
 
         # clean up the upload folder
         shutil.rmtree(self.app.config['UPLOAD_FOLDER'])
